@@ -21,7 +21,7 @@
 
 ## Notes
 
-<strong> Click on the graphics pane first to activate control using arrow keys.
+<strong> Click on the graphics pane first to activate control using arrow keys. </strong>
 
 ## Controls
 

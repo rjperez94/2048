@@ -4,7 +4,6 @@ public class Game2048withUndo implements UIButtonListener, UIKeyListener {
 
     Board2048withUndo game = null;
 
-    private int SIZE = 5;
     private boolean hasReachedTarget = false;
 
     public Game2048withUndo () {
@@ -30,11 +29,11 @@ public class Game2048withUndo implements UIButtonListener, UIKeyListener {
 
     /** Respond to key actions */
     public void keyPerformed(String key) {
-        if (key.equals("Space")) startGame();
-        else if ((key.equals("Left")) || (key.equals("Right")) || (key.equals("Up")) || (key.equals("Down"))) {
-            move (key);
+        switch (key) {
+            case "Space" -> startGame();
+            case "Left", "Right", "Up", "Down" -> move(key);
+            case "u" -> undo();
         }
-        else if (key.equals("u")) undo();
     }
 
     private void startGame() {
@@ -45,6 +44,7 @@ public class Game2048withUndo implements UIButtonListener, UIKeyListener {
         UI.println("Each time 2 tiles with the same number touch, the numbers are added and the two tiles merge.");
         UI.println("Produce the magic number of 2048.");
 
+        int SIZE = 5;
         game = new Board2048withUndo (SIZE);
         game.insertRandomTile();
         game.redraw();
@@ -56,10 +56,12 @@ public class Game2048withUndo implements UIButtonListener, UIKeyListener {
             return;
         }
 
-        if (direction.equals("Left")) game.left();
-        else if (direction.equals("Right")) game.right();
-        else if (direction.equals("Up")) game.up();
-        else if (direction.equals("Down")) game.down();
+        switch (direction) {
+            case "Left" -> game.left();
+            case "Right" -> game.right();
+            case "Up" -> game.up();
+            case "Down" -> game.down();
+        }
         game.undoStack();
         game.redraw();
 

@@ -6,13 +6,10 @@ import java.util.Stack;
 
 public class Board2048withUndo {
 
-    private final int LIMIT = 7; // to determine the ration of twos over fours (the closer to 10 the more twos)
-    private final int TARGET = 2048;
-
     private final int CELL;
-    private int [][] mainArray;
+    private final int [][] mainArray;
 
-    Stack <int [][]> myNums = new Stack <int [][]> ();
+    final Stack <int [][]> myNums = new Stack<>();
 
     public Board2048withUndo (int size) {
         CELL = size;
@@ -23,6 +20,7 @@ public class Board2048withUndo {
     public boolean hasReachedTarget() {
         for (int row=0; row<CELL; row++) {
             for (int col=0; col<CELL; col++) {
+                int TARGET = 2048;
                 if (mainArray[row][col] >= TARGET) return true;
             }
         }
@@ -63,7 +61,7 @@ public class Board2048withUndo {
         return num;
     }
 
-    /** Insert a random number (either 2 or 4) at a randon empty tile.
+    /** Insert a random number (either 2 or 4) at a random empty tile.
     Note that 7/10 times the number should be 2.
     An empty tile is one which holds the value 0
      */
@@ -72,7 +70,9 @@ public class Board2048withUndo {
             int num;
             Random rand = new Random();
             int result = rand.nextInt(10);
-            if(result<LIMIT) {
+            // to determine the ration of twos over fours (the closer to 10 the more twos)
+            int LIMIT = 7;
+            if(result< LIMIT) {
                 //70% chance this would happen
                 num = 2;
             }
@@ -82,7 +82,7 @@ public class Board2048withUndo {
             }
 
             boolean generated = false;
-            while (generated == false) {
+            while (!generated) {
                 int row = new Random().nextInt(5);
                 int col = new Random().nextInt(5);
                 if (mainArray[row][col]== 0) {
@@ -108,9 +108,8 @@ public class Board2048withUndo {
                 }
             }
 
-            for (int col=0; col<CELL; col++) {//
-                mainArray[row][col] = rowArray[col];
-            }
+            //
+            System.arraycopy(rowArray, 0, mainArray[row], 0, CELL);
 
             for (int col=0; col<CELL-1; col++) {
                 if (mainArray[row][col] == mainArray[row][col+1]) {
@@ -128,9 +127,8 @@ public class Board2048withUndo {
                 }
             }
 
-            for (int col=0; col<CELL; col++) {//
-                mainArray[row][col] = rowArray[col];
-            }
+            //
+            System.arraycopy(rowArray, 0, mainArray[row], 0, CELL);
         }
     }
 
@@ -149,9 +147,8 @@ public class Board2048withUndo {
                 }
             }
 
-            for (int col=0; col<CELL; col++) {//
-                mainArray[row][col] = rowArray[col];
-            }
+            //
+            System.arraycopy(rowArray, 0, mainArray[row], 0, CELL);
 
             for (int col=CELL-1; col>0; col--) {
                 if (mainArray[row][col] == mainArray[row][col-1]) {
@@ -169,15 +166,14 @@ public class Board2048withUndo {
                 }
             }
 
-            for (int col=0; col<CELL; col++) {//
-                mainArray[row][col] = rowArray[col];
-            }
+            //
+            System.arraycopy(rowArray, 0, mainArray[row], 0, CELL);
         }
     }
 
     /** Move the tiles up. 
     Each time 2 tiles with the same number touch, the number are added and the two tiles merge on 
-    the up side. An empty tile is then added on the down side of the board.
+    the upside. An empty tile is then added on the downside of the board.
      */
     public void up () {
         for (int col=0; col<CELL; col++) {//
@@ -261,9 +257,7 @@ public class Board2048withUndo {
         int [][] undo = new int [CELL][CELL];
 
         for (int row = 0; row <CELL; row++) {
-            for (int col = 0; col < CELL; col++) {
-                undo[row][col]= mainArray[row][col];
-            }
+            System.arraycopy(mainArray[row], 0, undo[row], 0, CELL);
         }
 
         myNums.push(undo);
@@ -271,31 +265,23 @@ public class Board2048withUndo {
 
     public void undo () {
         if (!myNums.empty()) {
-            int [][] undo = new int [CELL][CELL];
-            undo = myNums.pop();
+            int [][] undo = myNums.pop();
 
             for (int row = 0; row <CELL; row++) {
-                for (int col = 0; col < CELL; col++) {            
-                    mainArray[row][col] = undo[row][col];
-                }
+                System.arraycopy(undo[row], 0, mainArray[row], 0, CELL);
             }
         }
     }
 
     public String toString() {
-        String ans = "  ";
+        StringBuilder ans = new StringBuilder("  ");
         for (int row = 0; row < CELL; row++) {
             for (int col = 0; col < CELL; col++) {
-                ans += mainArray[row][col];
+                ans.append(mainArray[row][col]);
             }
         }
-        return ans;
+        return ans.toString();
     }
-
-    // layout of the board
-    private final int boardLeft = 80;    // left edge of the board
-    private final int boardTop = 40;     // top edge of the board
-    private final int tileSize = 50;     // width of tiles in the board
 
     public void redraw() {
         UI.clearGraphics();
@@ -308,17 +294,23 @@ public class Board2048withUndo {
     }
 
     private void drawTile(int row, int col) {
-        int shiftBy = 3;
-        double left = boardLeft+col*tileSize;
-        double top = boardTop+row*tileSize;
+        // layout of the board
+        // left edge of the board
+        int boardLeft = 80;
+        // width of tiles in the board
+        int tileSize = 50;
+        double left = boardLeft +col* tileSize;
+        // top edge of the board
+        int boardTop = 40;
+        double top = boardTop +row* tileSize;
 
         // Fill the rectangle with a colour matching the value of the tile
         UI.setColor(getColor(mainArray[row][col]));
-        UI.fillRect(left,top,tileSize,tileSize);
+        UI.fillRect(left,top, tileSize, tileSize);
 
         // Outline the rectangle
         UI.setColor(Color.black);
-        UI.drawRect(left,top,tileSize,tileSize);
+        UI.drawRect(left,top, tileSize, tileSize);
 
         // Display the number
         UI.setFontSize(20);
@@ -330,15 +322,15 @@ public class Board2048withUndo {
     }
 
     private Color getColor(int value) {
-        switch (value) {
-            case 0 : { return Color.white; }     
-            case 2 : { return Color.gray; }    
-            case 4 : { return Color.orange; }  
-            case 8 : { return Color.red; }   
-            case 16 : { return Color.cyan; }     
-            case 32 : { return Color.blue; }
-            case 64 : { return Color.green; }
-            default: {return Color.black;}
-        }
+        return switch (value) {
+            case 0 -> Color.white;
+            case 2 -> Color.gray;
+            case 4 -> Color.orange;
+            case 8 -> Color.red;
+            case 16 -> Color.cyan;
+            case 32 -> Color.blue;
+            case 64 -> Color.green;
+            default -> Color.black;
+        };
     }
 }
